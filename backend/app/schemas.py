@@ -16,6 +16,7 @@ class IngredientOut(IngredientBase):
     class Config:
         from_attributes = True
 
+
 class StepBase(BaseModel):
     order_number: int
     instruction: str
@@ -29,11 +30,13 @@ class StepOut(StepBase):
     class Config:
         from_attributes = True
 
+
 class TagBase(BaseModel):
     name: str
 
 class TagCreate(TagBase):
     pass
+
 
 class TagOut(TagBase):
     id: int
@@ -41,14 +44,17 @@ class TagOut(TagBase):
     class Config:
         from_attributes = True
 
+
 class RecipeBase(BaseModel):
     title: str
     description: Optional[str] = None
+
 
 class RecipeCreate(RecipeBase):
     ingredients: List[IngredientCreate] = []
     steps: List[StepCreate] = []
     tag_ids: List[int] = []
+
 
 class RecipeOut(RecipeBase):
     id: int
