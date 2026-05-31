@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import '../models/tag.dart';
 import '../services/recipe_service.dart';
 import '../widgets/tag_chip.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import '../config/api.dart';
 
 class AddRecipeScreen extends StatefulWidget {
   final bool isDarkMode;
@@ -24,6 +28,8 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
   List<Map<String, String>> _ingredients = [];
   List<String> _steps = [];
   bool _saving = false;
+  File? _selectedPhoto;
+  final ImagePicker _picker = ImagePicker();
 
   final _ingNameController = TextEditingController();
   final _ingQtyController = TextEditingController();
@@ -77,6 +83,29 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     } catch (_) {}
   }
 
+  Future<void> _pickPhoto() async {
+    final picked = await _picker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
+    if (picked != null) {
+      setState(() => _selectedPhoto = File(picked.path));
+    }
+  }
+
+  Future<void> _uploadPhoto(int recipeId) async {
+    if (_selectedPhoto == null) return;
+    final base = await ApiConfig.getBaseUrl();
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('$base/recipes/$recipeId/photos'),
+    );
+    request.files.add(
+      await http.MultipartFile.fromPath('file', _selectedPhoto!.path),
+    );
+    await request.send();
+  }
+
   Future<void> _save() async {
     if (_titleController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -91,7 +120,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     setState(() => _saving = true);
 
     try {
-      await _service.createRecipe({
+      final recipe = await _service.createRecipe({
         'title': _titleController.text.trim(),
         'description': _descController.text.trim(),
         'ingredients': _ingredients,
@@ -105,6 +134,8 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
             .toList(),
         'tag_ids': _selectedTagIds,
       });
+
+      await _uploadPhoto(recipe.id);
 
       if (context.mounted) Navigator.pop(context);
     } catch (e) {
@@ -267,6 +298,46 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (_selectedPhoto != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.file(
+                    _selectedPhoto!,
+                    height: 180,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              ),
+            GestureDetector(
+              onTap: _pickPhoto,
+              child: Container(
+                height: 52,
+                margin: const EdgeInsets.only(bottom: 24),
+                decoration: BoxDecoration(
+                  color: surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: border),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.add_photo_alternate_outlined, color: accent, size: 20),
+                    const SizedBox(width: 10),
+                    Text(
+                      _selectedPhoto != null ? 'Change photo' : 'Add photo',
+                      style: TextStyle(
+                        color: textPrimary,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
             sectionLabel('TITLE'),
             TextField(
               controller: _titleController,
