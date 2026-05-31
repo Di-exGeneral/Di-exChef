@@ -7,6 +7,7 @@ from typing import List
 
 router = APIRouter()
 
+
 @router.post("/", response_model=TagOut)
 def create_tag(tag: TagCreate, db: Session = Depends(get_db)):
     existing = db.query(Tag).filter(Tag.name == tag.name).first()
@@ -32,3 +33,4 @@ def delete_tag(tag_id: int, db: Session = Depends(get_db)):
     db.delete(tag)
     db.commit()
     return {"message": f"Tag '{tag.name}' deleted"}
+
