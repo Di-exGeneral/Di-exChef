@@ -2,10 +2,12 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional, List
 
+
 class IngredientBase(BaseModel):
     name: str
     quantity: Optional[str] = None
     unit: Optional[str] = None
+
 
 class IngredientCreate(IngredientBase):
     pass
