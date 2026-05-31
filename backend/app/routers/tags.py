@@ -33,3 +33,4 @@ def delete_tag(tag_id: int, db: Session = Depends(get_db)):
     db.delete(tag)
     db.commit()
     return {"message": f"Tag '{tag.name}' deleted"}
+
