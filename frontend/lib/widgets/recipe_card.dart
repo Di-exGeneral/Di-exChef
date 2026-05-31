@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/recipe.dart';
+import '../config/api.dart';
 
 class RecipeCard extends StatelessWidget {
   final Recipe recipe;
@@ -28,20 +29,32 @@ class RecipeCard extends StatelessWidget {
             if (recipe.photos.isNotEmpty)
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                child: Image.network(
-                  'http://10.0.2.2:8000/photos/${recipe.photos.first}',
-                  height: 180,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    height: 180,
-                    color: const Color(0xFF2C2C2C),
-                    child: const Center(
-                      child: Icon(Icons.restaurant, color: Color(0xFF3C3C3C), size: 40),
-                    ),
-                  ),
+                child: FutureBuilder<String>(
+                  future: ApiConfig.getBaseUrl(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return Container(
+                        height: 180,
+                        color: const Color(0xFF2C2C2C),
+                      );
+                    }
+                    return Image.network(
+                      '${snapshot.data}/photos/${recipe.photos.first}',
+                      height: 180,
+                      width: double.infinity,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        height: 180,
+                        color: const Color(0xFF2C2C2C),
+                        child: const Center(
+                          child: Icon(Icons.restaurant, color: Color(0xFF3C3C3C), size: 40),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               )
+
             else
               ClipRRect(
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
@@ -53,6 +66,7 @@ class RecipeCard extends StatelessWidget {
                   ),
                 ),
               ),
+
             Padding(
               padding: const EdgeInsets.all(14),
               child: Column(
@@ -71,6 +85,7 @@ class RecipeCard extends StatelessWidget {
                         ),
                       ),
                     ),
+
                   Text(
                     recipe.title,
                     style: const TextStyle(
@@ -93,6 +108,7 @@ class RecipeCard extends StatelessWidget {
                         ),
                       ),
                     ),
+
                   const SizedBox(height: 10),
                   Text(
                     '${recipe.ingredients.length} ingredients · ${recipe.steps.length} steps',

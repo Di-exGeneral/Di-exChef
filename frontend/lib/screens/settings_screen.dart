@@ -24,6 +24,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     super.initState();
     _isDarkMode = widget.isDarkMode;
+    _baseUrlController = TextEditingController();
     _loadBaseUrl();
   }
 

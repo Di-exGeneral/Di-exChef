@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/recipe.dart';
 import '../services/recipe_service.dart';
 import '../widgets/tag_chip.dart';
+import '../config/api.dart';
 
 class RecipeDetailScreen extends StatelessWidget {
   final Recipe recipe;
@@ -16,24 +17,33 @@ class RecipeDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final service = RecipeService();
+    final isDark = isDarkMode;
+    final bg = isDark ? const Color(0xFF121212) : const Color(0xFFF5F5F5);
+    final surface = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    final border = isDark ? const Color(0xFF2C2C2C) : const Color(0xFFE0E0E0);
+    final textPrimary = isDark ? const Color(0xFFEEEEEE) : const Color(0xFF1A1A1A);
+    final textSecondary = isDark ? const Color(0xFF7A7A7A) : const Color(0xFF888888);
+    final textBody = isDark ? const Color(0xFFCCCCCC) : const Color(0xFF444444);
+    const accent = Color(0xFFFF6B35);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
+      backgroundColor: bg,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
             expandedHeight: 280,
             pinned: true,
-            backgroundColor: const Color(0xFF121212),
+            backgroundColor: bg,
             leading: GestureDetector(
               onTap: () => Navigator.pop(context),
               child: Container(
                 margin: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF1E1E1E),
+                  color: surface,
                   borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: border),
                 ),
-                child: const Icon(Icons.arrow_back, color: Color(0xFFEEEEEE), size: 20),
+                child: Icon(Icons.arrow_back, color: textPrimary, size: 20),
               ),
             ),
             actions: [
@@ -42,23 +52,23 @@ class RecipeDetailScreen extends StatelessWidget {
                   final confirm = await showDialog<bool>(
                     context: context,
                     builder: (_) => AlertDialog(
-                      backgroundColor: const Color(0xFF1E1E1E),
-                      title: const Text(
+                      backgroundColor: surface,
+                      title: Text(
                         'Delete recipe?',
-                        style: TextStyle(color: Color(0xFFEEEEEE)),
+                        style: TextStyle(color: textPrimary),
                       ),
-                      content: const Text(
+                      content: Text(
                         'This cannot be undone.',
-                        style: TextStyle(color: Color(0xFF7A7A7A)),
+                        style: TextStyle(color: textSecondary),
                       ),
                       actions: [
                         TextButton(
                           onPressed: () => Navigator.pop(context, false),
-                          child: const Text('Cancel', style: TextStyle(color: Color(0xFF7A7A7A))),
+                          child: Text('Cancel', style: TextStyle(color: textSecondary)),
                         ),
                         TextButton(
                           onPressed: () => Navigator.pop(context, true),
-                          child: const Text('Delete', style: TextStyle(color: Color(0xFFFF6B35))),
+                          child: const Text('Delete', style: TextStyle(color: accent)),
                         ),
                       ],
                     ),
@@ -71,24 +81,33 @@ class RecipeDetailScreen extends StatelessWidget {
                 child: Container(
                   margin: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF1E1E1E),
+                    color: surface,
                     borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: border),
                   ),
                   child: const Padding(
                     padding: EdgeInsets.all(8),
-                    child: Icon(Icons.delete_outline, color: Color(0xFFFF6B35), size: 20),
+                    child: Icon(Icons.delete_outline, color: accent, size: 20),
                   ),
                 ),
               ),
             ],
             flexibleSpace: FlexibleSpaceBar(
               background: recipe.photos.isNotEmpty
-                  ? Image.network(
-                'http://10.0.2.2:8000/photos/${recipe.photos.first}',
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(color: const Color(0xFF1E1E1E)),
+                  ? FutureBuilder<String>(
+                future: ApiConfig.getBaseUrl(),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return Container(color: surface);
+                  }
+                  return Image.network(
+                    '${snapshot.data}/photos/${recipe.photos.first}',
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => Container(color: surface),
+                  );
+                },
               )
-                  : Container(color: const Color(0xFF1E1E1E)),
+                  : Container(color: surface),
             ),
           ),
           SliverToBoxAdapter(
@@ -107,10 +126,10 @@ class RecipeDetailScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   Text(
                     recipe.title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFFEEEEEE),
+                      color: textPrimary,
                     ),
                   ),
                   if (recipe.description != null && recipe.description!.isNotEmpty)
@@ -118,9 +137,9 @@ class RecipeDetailScreen extends StatelessWidget {
                       padding: const EdgeInsets.only(top: 8),
                       child: Text(
                         recipe.description!,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 14,
-                          color: Color(0xFF7A7A7A),
+                          color: textSecondary,
                           height: 1.6,
                         ),
                       ),
@@ -131,7 +150,7 @@ class RecipeDetailScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFFFF6B35),
+                      color: accent,
                       letterSpacing: 1.4,
                     ),
                   ),
@@ -145,17 +164,14 @@ class RecipeDetailScreen extends StatelessWidget {
                             width: 6,
                             height: 6,
                             decoration: const BoxDecoration(
-                              color: Color(0xFFFF6B35),
+                              color: accent,
                               shape: BoxShape.circle,
                             ),
                           ),
                           const SizedBox(width: 12),
                           Text(
                             '${ing.quantity ?? ''} ${ing.unit ?? ''} ${ing.name}'.trim(),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Color(0xFFCCCCCC),
-                            ),
+                            style: TextStyle(fontSize: 14, color: textBody),
                           ),
                         ],
                       ),
@@ -167,7 +183,7 @@ class RecipeDetailScreen extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFFFF6B35),
+                      color: accent,
                       letterSpacing: 1.4,
                     ),
                   ),
@@ -182,9 +198,9 @@ class RecipeDetailScreen extends StatelessWidget {
                             width: 28,
                             height: 28,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF1E1E1E),
+                              color: surface,
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: const Color(0xFF2C2C2C)),
+                              border: Border.all(color: border),
                             ),
                             child: Center(
                               child: Text(
@@ -192,7 +208,7 @@ class RecipeDetailScreen extends StatelessWidget {
                                 style: const TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFFFF6B35),
+                                  color: accent,
                                 ),
                               ),
                             ),
@@ -201,9 +217,9 @@ class RecipeDetailScreen extends StatelessWidget {
                           Expanded(
                             child: Text(
                               step.instruction,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 14,
-                                color: Color(0xFFCCCCCC),
+                                color: textBody,
                                 height: 1.5,
                               ),
                             ),
