@@ -1,5 +1,5 @@
-name: frontend
-description: "A new Flutter project."
+name: di_exchef
+description: "A personal recipe manager built as a daily-use utility and a hands-on DevOps learning project. This is for people who often forget their own recipes."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -31,8 +31,10 @@ dependencies:
   http: ^1.2.1
   flutter:
     sdk: flutter
-    
+
   shared_preferences: ^2.2.3
+  flutter_launcher_icons: ^0.14.1
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
@@ -89,3 +91,7 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/logo.png"

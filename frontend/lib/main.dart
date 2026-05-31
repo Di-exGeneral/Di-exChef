@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/home_screen.dart';
 import 'screens/add_recipe_screen.dart';
 import 'screens/settings_screen.dart';
+import 'screens/search_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -88,6 +89,7 @@ class _MainShellState extends State<MainShell> {
 
     final screens = [
       HomeScreen(isDarkMode: widget.isDarkMode),
+      SearchScreen(isDarkMode: widget.isDarkMode),
       AddRecipeScreen(isDarkMode: widget.isDarkMode),
       SettingsScreen(
         isDarkMode: widget.isDarkMode,
@@ -112,11 +114,17 @@ class _MainShellState extends State<MainShell> {
           showSelectedLabels: true,
           showUnselectedLabels: true,
           elevation: 0,
+
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),
               activeIcon: Icon(Icons.home),
               label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.search_outlined),
+              activeIcon: Icon(Icons.search),
+              label: 'Search',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.add_circle_outline),
