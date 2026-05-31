@@ -24,5 +24,3 @@ app.include_router(tags.router, prefix="/tags", tags=["tags"])
 @app.get("/")
 def root():
     return {"message": "Di-exChef API is running"}
-
-
