@@ -10,6 +10,7 @@ class IngredientBase(BaseModel):
 class IngredientCreate(IngredientBase):
     pass
 
+
 class IngredientOut(IngredientBase):
     id: int
 
@@ -21,8 +22,10 @@ class StepBase(BaseModel):
     order_number: int
     instruction: str
 
+
 class StepCreate(StepBase):
     pass
+
 
 class StepOut(StepBase):
     id: int
@@ -33,6 +36,7 @@ class StepOut(StepBase):
 
 class TagBase(BaseModel):
     name: str
+
 
 class TagCreate(TagBase):
     pass
