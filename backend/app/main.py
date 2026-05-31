@@ -3,15 +3,16 @@ from .database import engine, Base
 from .routers import recipes, tags
 import os
 
-Base.metadata.create_all(bind=engine)
-
 app = FastAPI(
     title="Di-exChef API",
     description="Personal recipe manager backend",
     version="1.0.0",
 )
 
-os.makedirs(os.getenv("PHOTOS_DIR", "/app/photos"), exist_ok=True)
+@app.on_event("startup")
+def startup():
+    Base.metadata.create_all(bind=engine)
+    os.makedirs(os.getenv("PHOTOS_DIR", "/app/photos"), exist_ok=True)
 
 app.include_router(recipes.router, prefix="/recipes", tags=["recipes"])
 app.include_router(tags.router, prefix="/tags", tags=["tags"])
