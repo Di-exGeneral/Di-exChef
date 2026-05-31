@@ -1,0 +1,70 @@
+name: Di-exChef CI
+
+on:
+    push:
+      branches: [ main ]
+  
+    pull_request:
+      branches: [ main ]
+
+jobs:
+  backend:
+    name: Backend - Lint and Test
+    runs-on: ubuntu-latest
+
+    services:
+      db:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_pass
+          POSTGRES_DB: test_db
+
+        ports:
+          - 5432:5432
+
+        options: >-
+          --health-cmd pg_isready
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+          
+    env:
+      DATABASE_URL: postgresql://test_user:test_pass@localhost:5432/test_db
+      PHOTOS_DIR: /tmp/photos
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependamcies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+           pip install -r requirements-dev.txt
+
+      - name: Lint with flake8
+        run: |
+          cd backend
+          flake8 app/ --max-line-length=120 --exclude=__pycache__
+
+      - name: Run tests
+        run: |
+          cd backend
+          pytest tests/ -v
+
+  docker:
+    name: Docker — Build Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build ./backend -t di-exchef-api

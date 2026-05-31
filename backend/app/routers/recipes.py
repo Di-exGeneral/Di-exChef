@@ -13,6 +13,7 @@ router = APIRouter()
 
 PHOTOS_DIR = os.getenv("PHOTOS_DIR", "/app/photos")
 
+
 @router.post("/", response_model=RecipeOut)
 def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
     new_recipe = Recipe(title=recipe.title, description=recipe.description)
@@ -34,6 +35,7 @@ def create_recipe(recipe: RecipeCreate, db: Session = Depends(get_db)):
     db.refresh(new_recipe)
     return _format_recipe(new_recipe)
 
+
 @router.get("/", response_model=List[RecipeOut])
 def list_recipes(
     tag: Optional[str] = Query(None),
@@ -50,12 +52,14 @@ def list_recipes(
 
     return [_format_recipe(r) for r in query.all()]
 
+
 @router.get("/{recipe_id}", response_model=RecipeOut)
 def get_recipe(recipe_id: int, db: Session = Depends(get_db)):
     recipe = db.query(Recipe).filter(Recipe.id == recipe_id).first()
     if not recipe:
         raise HTTPException(status_code=404, detail="Recipe not found")
     return _format_recipe(recipe)
+
 
 @router.delete("/{recipe_id}")
 def delete_recipe(recipe_id: int, db: Session = Depends(get_db)):
@@ -65,6 +69,7 @@ def delete_recipe(recipe_id: int, db: Session = Depends(get_db)):
     db.delete(recipe)
     db.commit()
     return {"message": f"Recipe '{recipe.title}' deleted"}
+
 
 @router.post("/{recipe_id}/photos")
 def upload_photo(recipe_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
@@ -90,6 +95,7 @@ def upload_photo(recipe_id: int, file: UploadFile = File(...), db: Session = Dep
     db.commit()
 
     return {"message": "Photo uploaded", "filename": filename}
+
 
 def _format_recipe(recipe: Recipe) -> dict:
     return {
