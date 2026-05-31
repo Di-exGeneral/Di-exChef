@@ -106,6 +106,22 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
     await request.send();
   }
 
+  void _clearForm() {
+    _titleController.clear();
+    _descController.clear();
+    _newTagController.clear();
+    _ingNameController.clear();
+    _ingQtyController.clear();
+    _ingUnitController.clear();
+    _stepController.clear();
+    setState(() {
+      _ingredients = [];
+      _steps = [];
+      _selectedTagIds = [];
+      _selectedPhoto = null;
+    });
+  }
+
   Future<void> _save() async {
     if (_titleController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -136,8 +152,17 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       });
 
       await _uploadPhoto(recipe.id);
+      _clearForm();
 
-      if (context.mounted) Navigator.pop(context);
+      if (context.mounted) {
+        setState(() => _saving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Recipe saved successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
     } catch (e) {
       setState(() => _saving = false);
       if (context.mounted) {
@@ -149,43 +174,6 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
         );
       }
     }
-  }
-
-  Widget _sectionLabel(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: Color(0xFFFF6B35),
-          letterSpacing: 1.4,
-        ),
-      ),
-    );
-  }
-
-  InputDecoration _inputDecoration(String hint) {
-    return InputDecoration(
-      hintText: hint,
-      hintStyle: const TextStyle(color: Color(0xFF555555), fontSize: 14),
-      filled: true,
-      fillColor: const Color(0xFF1E1E1E),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF2C2C2C)),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFF2C2C2C)),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: Color(0xFFFF6B35)),
-      ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-    );
   }
 
   @override
@@ -240,18 +228,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       appBar: AppBar(
         backgroundColor: bg,
         elevation: 0,
-        leading: GestureDetector(
-          onTap: () => Navigator.pop(context),
-          child: Container(
-            margin: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: surface,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: border),
-            ),
-            child: Icon(Icons.arrow_back, color: textPrimary, size: 20),
-          ),
-        ),
+        leading: const SizedBox(),
         title: Text(
           'New recipe',
           style: TextStyle(

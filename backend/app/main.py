@@ -1,8 +1,8 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from .database import engine, Base
 from .routers import recipes, tags
 import os
-
 
 app = FastAPI(
     title="Di-exChef API",
@@ -15,6 +15,7 @@ app = FastAPI(
 def startup():
     Base.metadata.create_all(bind=engine)
     os.makedirs(os.getenv("PHOTOS_DIR", "/app/photos"), exist_ok=True)
+    app.mount("/photos", StaticFiles(directory=os.getenv("PHOTOS_DIR", "/app/photos")), name="photos")
 
 
 app.include_router(recipes.router, prefix="/recipes", tags=["recipes"])
